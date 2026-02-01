@@ -12,7 +12,28 @@
           "package_name": "com.progresstracker"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "327459705334-91cf13bjisd891ou9r75sr0eduea30ug.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.progresstracker",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "327459705334-j93h6vr1dldi1mtsre9hudemjet3o2aa.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.progresstracker",
+            "certificate_hash": "8ffda2f6d1e8611a21dce07808ec9984bc7f923c"
+          }
+        },
+        {
+          "client_id": "327459705334-lu8c51bmeegr4iah7agslomse5bdami9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyA6_3lHUOJAcXn-CpxwNEnMGgwvwFbssHY"
@@ -20,7 +41,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "327459705334-lu8c51bmeegr4iah7agslomse5bdami9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
