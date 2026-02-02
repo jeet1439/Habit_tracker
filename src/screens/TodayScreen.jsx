@@ -16,10 +16,16 @@ const COLORS = {
   bg: '#F8F9FE',
   primary: '#5E60CE',
   primaryLight: '#E0E0FF',
-  secondary: '#4ADE80',
-  secondaryLight: '#DCFCE7',
-  danger: '#EF4444',
+  
+  green100: '#DCFCE7', 
+  green300: '#86EFAC',
+  green500: '#4ADE80',
+  green700: '#15803D',
+  green900: '#09662e',
+  
+  danger: '#e43c3c',
   dangerLight: '#FEE2E2',
+  
   textDark: '#1E293B',
   textGray: '#64748B',
   white: '#FFFFFF',
@@ -44,6 +50,7 @@ export default function TodayScreen() {
   useEffect(() => {
     if (!userId) return;
 
+    // 1. Listen to Habits
     const habitUnsub = firestore()
       .collection('users').doc(userId).collection('habits')
       .orderBy('startTime', 'asc')
@@ -54,14 +61,20 @@ export default function TodayScreen() {
           icon: getIconForHabit(doc.data().name)
         }));
         setRawHabits(habits);
+        
         calculateWeekAndStreak(habits);
-        setLoading(false);
       });
 
     const statusUnsub = firestore()
       .collection('users').doc(userId).collection('daily_status').doc(todayStr)
       .onSnapshot(doc => {
-        setCompletedIds(doc.data()?.completed || []);
+        const completed = doc.data()?.completed || [];
+        setCompletedIds(completed);
+
+        if(rawHabits.length > 0) {
+           calculateWeekAndStreak(rawHabits, completed);
+        }
+        setLoading(false);
       });
 
     return () => {
@@ -70,42 +83,51 @@ export default function TodayScreen() {
     };
   }, [userId]);
 
-  const calculateWeekAndStreak = async (currentHabits) => {
+  const calculateWeekAndStreak = async (currentHabits, todayCompletedOverride = null) => {
     const days = [];
     const today = new Date();
     let currentStreak = 0;
-    let streakBroken = false;
+
+    const totalHabitsCount = currentHabits.length;
 
     for (let i = -6; i <= 0; i++) {
       const d = new Date(today);
       d.setDate(today.getDate() + i);
       const dateStr = d.toISOString().split('T')[0];
+      const isToday = i === 0;
 
-      const snap = await firestore()
-        .collection('users').doc(userId)
-        .collection('daily_status').doc(dateStr).get();
+      let doneCount = 0;
 
-      const doneCount = snap.data()?.completed?.length || 0;
-      const isAllDone = currentHabits.length > 0 && doneCount === currentHabits.length;
+      if (isToday && todayCompletedOverride) {
+        doneCount = todayCompletedOverride.length;
+      } else {
+        const snap = await firestore()
+          .collection('users').doc(userId)
+          .collection('daily_status').doc(dateStr).get();
+        doneCount = snap.data()?.completed?.length || 0;
+      }
+
+      const isAllDone = totalHabitsCount > 0 && doneCount === totalHabitsCount;
 
       days.push({
         dayName: d.toLocaleDateString('en-US', { weekday: 'narrow' }),
         dayNum: d.getDate(),
         fullDate: dateStr,
+        doneCount,
+        totalCount: totalHabitsCount,
         isAllDone,
-        isToday: i === 0
+        isToday
       });
     }
 
     const reversedDays = [...days].reverse();
-
-    reversedDays.forEach((day, idx) => {
-      if (day.isAllDone) {
-        currentStreak++;
-      } else if (!day.isToday) {
-        streakBroken = true;
-      }
-    });
+    for (let day of reversedDays) {
+       if (day.isAllDone) {
+         currentStreak++;
+       } else if (!day.isToday) {
+         break;
+       }
+    }
 
     setWeekData(days);
     setStreak(currentStreak);
@@ -132,11 +154,32 @@ export default function TodayScreen() {
 
   const getIconForHabit = (name) => {
     const n = name?.toLowerCase() || '';
-    if (n.includes('gym')) return 'dumbbell';
+    if (n.includes('gym') || n.includes('workout')) return 'dumbbell';
     if (n.includes('read')) return 'book-open-variant';
-    if (n.includes('code')) return 'laptop';
+    if (n.includes('code') || n.includes('dev')) return 'laptop';
     if (n.includes('water')) return 'water';
+    if (n.includes('meditat')) return 'spa';
     return 'checkbox-marked-circle-outline';
+  };
+
+  const getColorForDay = (done, total) => {
+    if (total === 0) return COLORS.bg; 
+    if (done === 0) return COLORS.danger; 
+
+    const ratio = done / total;
+
+    if (ratio <= 0.25) return COLORS.green100;
+    if (ratio <= 0.50) return COLORS.green300;
+    if (ratio <= 0.75) return COLORS.green500;
+    if (ratio < 1.0) return COLORS.green700;
+    return COLORS.green900; // 100% done
+  };
+
+  const getTextColorForDay = (done, total) => {
+    if (done === 0) return COLORS.white; 
+    const ratio = done / total;
+    if (ratio < 0.5 && ratio > 0) return COLORS.textDark; 
+    return COLORS.white; 
   };
 
   const completedCount = completedIds.length;
@@ -147,11 +190,8 @@ export default function TodayScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor="#F8F9FE"
-        translucent={false}
-      />
+      <StatusBar barStyle="dark-content" backgroundColor="#F8F9FE" translucent={false} />
+      
       <ScrollView contentContainerStyle={styles.scrollContent}>
 
         <View style={styles.header}>
@@ -165,51 +205,63 @@ export default function TodayScreen() {
           </View>
         </View>
 
-        {/* Calendar Strip with Red/Green Logic */}
         <View style={styles.calendarContainer}>
-          {weekData.map((item, index) => (
-            <View key={index} style={styles.calendarItem}>
-              <Text style={styles.dayLabel}>{item.dayName}</Text>
-              <View style={[
-                styles.dateCircle,
-                item.isToday ? styles.dateToday : (item.isAllDone ? styles.dateDone : styles.dateIncomplete)
-              ]}>
-                <Text style={[styles.dateText, (item.isAllDone || item.isToday) ? { color: '#FFF' } : { color: COLORS.danger }]}>
-                  {item.dayNum}
-                </Text>
+          {weekData.map((item, index) => {
+            const bgColor = getColorForDay(item.doneCount, item.totalCount);
+            const textColor = getTextColorForDay(item.doneCount, item.totalCount);
+            
+            return (
+              <View key={index} style={styles.calendarItem}>
+                <Text style={styles.dayLabel}>{item.dayName}</Text>
+                <View style={[
+                  styles.dateSquare, 
+                  { backgroundColor: bgColor }
+                ]}>
+                  <Text style={[styles.dateText, { color: textColor }]}>
+                    {item.dayNum}
+                  </Text>
+                </View>
               </View>
-            </View>
-          ))}
+            );
+          })}
         </View>
 
         {/* Progress Card */}
         <View style={styles.progressCard}>
           <CircularProgress total={totalCount} completed={completedCount} />
           <View style={styles.progressTextContainer}>
-            <Text style={styles.progressTitle}>{completedCount === totalCount ? "Goal Reached!" : "Keep Pushing!"}</Text>
-            <Text style={styles.progressDesc}>Complete all tasks to maintain your streak.</Text>
+            <Text style={styles.progressTitle}>
+              {completedCount === totalCount && totalCount > 0 ? "All Clear!" : "Keep Going!"}
+            </Text>
+            <Text style={styles.progressDesc}>
+              {completedCount}/{totalCount} tasks completed today.
+            </Text>
           </View>
         </View>
 
         {/* Task List */}
         <View style={styles.tasksContainer}>
           <Text style={styles.sectionTitle}>MY HABITS</Text>
-          {tasks.map((task) => (
-            <TouchableOpacity key={task.key} onPress={() => toggleTask(task.key)} style={[styles.taskCard, task.isCompleted && styles.taskCardDone]}>
-              <View style={styles.taskLeft}>
-                <View style={[styles.taskIconBg, task.isCompleted && { backgroundColor: COLORS.secondaryLight }]}>
-                  <Icon name={task.icon} size={24} color={task.isCompleted ? COLORS.secondary : COLORS.primary} />
+          {tasks.length === 0 ? (
+            <Text style={{color: COLORS.textGray, textAlign: 'center', marginTop: 20}}>No habits added yet.</Text>
+          ) : (
+             tasks.map((task) => (
+              <TouchableOpacity key={task.key} onPress={() => toggleTask(task.key)} style={[styles.taskCard, task.isCompleted && styles.taskCardDone]}>
+                <View style={styles.taskLeft}>
+                  <View style={[styles.taskIconBg, task.isCompleted && { backgroundColor: COLORS.green100 }]}>
+                    <Icon name={task.icon} size={24} color={task.isCompleted ? COLORS.green700 : COLORS.primary} />
+                  </View>
+                  <View>
+                    <Text style={[styles.taskTitle, task.isCompleted && styles.textStrikethrough]}>{task.name}</Text>
+                    <Text style={styles.taskTime}>{task.startTime} - {task.endTime}</Text>
+                  </View>
                 </View>
-                <View>
-                  <Text style={[styles.taskTitle, task.isCompleted && styles.textStrikethrough]}>{task.name}</Text>
-                  <Text style={styles.taskTime}>{task.startTime} - {task.endTime}</Text>
+                <View style={[styles.checkCircle, task.isCompleted ? {backgroundColor: COLORS.green500} : {backgroundColor: COLORS.primary}]}>
+                  <Icon name={task.isCompleted ? "check" : "plus"} size={task.isCompleted ? 16 : 24} color={COLORS.white} />
                 </View>
-              </View>
-              <View style={task.isCompleted ? styles.checkCircle : styles.plusBtn}>
-                <Icon name={task.isCompleted ? "check" : "plus"} size={task.isCompleted ? 16 : 24} color={COLORS.white} />
-              </View>
-            </TouchableOpacity>
-          ))}
+              </TouchableOpacity>
+            ))
+          )}
         </View>
 
       </ScrollView>
@@ -287,33 +339,30 @@ const styles = StyleSheet.create({
   },
   calendarItem: {
     alignItems: 'center',
-    gap: 5,
+    gap: 8,
   },
   dayLabel: {
     fontSize: 12,
     fontWeight: '600',
     color: COLORS.textGray,
   },
-  dateCircle: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+  dateSquare: {
+    width: 40, 
+    height: 40,
+    borderRadius: 8, // Makes it a square with rounded corners
     justifyContent: 'center',
     alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
-  dateToday: {
-    backgroundColor: COLORS.primary,
-  },
-  dateDone: {
-    backgroundColor: COLORS.secondary,
-  },
-  dateIncomplete: {
-    backgroundColor: COLORS.dangerLight,
-    borderWidth: 1,
-    borderColor: COLORS.danger,
+  todayBorder: {
+    borderWidth: 2,
   },
   dateText: {
-    fontWeight: '700',
+    fontWeight: '800',
     fontSize: 14,
   },
 
@@ -377,7 +426,7 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
   },
   taskCardDone: {
-    opacity: 0.7,
+    opacity: 0.8,
   },
   taskLeft: {
     flexDirection: 'row',
@@ -407,26 +456,12 @@ const styles = StyleSheet.create({
     color: COLORS.textGray,
     marginTop: 2,
   },
-
   checkCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: COLORS.secondary,
+    width: 35,
+    height: 35,
+    borderRadius: 17.5, 
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  plusBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: COLORS.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 4,
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
+    elevation: 2,
   },
 });
