@@ -29,7 +29,6 @@ export default function NotesScreen() {
 
   const userId = auth().currentUser?.uid;
 
-  // 1. Fetch Notes for this User
   useEffect(() => {
     if (!userId) return;
 
@@ -47,7 +46,6 @@ export default function NotesScreen() {
     return () => subscriber();
   }, [userId]);
 
-  // 2. Add or Update Note
   const handleSaveNote = async () => {
     if (!noteTitle.trim() && !noteBody.trim()) return;
 
@@ -108,7 +106,10 @@ export default function NotesScreen() {
           <Icon name="trash-can-outline" size={20} color={COLORS.textGray} />
         </TouchableOpacity>
       </View>
-      <Text style={styles.noteContent} numberOfLines={3}>{item.content}</Text>
+      
+      {/* UPDATED: Removed numberOfLines to show full content */}
+      <Text style={styles.noteContent}>{item.content}</Text>
+      
       <Text style={styles.noteDate}>
         {item.updatedAt?.toDate().toLocaleDateString() || 'Just now'}
       </Text>
@@ -139,7 +140,7 @@ export default function NotesScreen() {
         data={filteredNotes}
         renderItem={renderNote}
         keyExtractor={item => item.id}
-        numColumns={2}
+        // UPDATED: Removed numColumns={2} for single column list
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={<Text style={styles.emptyText}>No notes found.</Text>}
       />
@@ -184,7 +185,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.bg
-
   },
   header: {
     padding: 20
@@ -209,8 +209,8 @@ const styles = StyleSheet.create({
   listContent: { padding: 10 },
   noteCard: {
     backgroundColor: COLORS.white,
-    flex: 1,
-    margin: 8,
+    marginVertical: 8, 
+    marginHorizontal: 4,
     padding: 15,
     borderRadius: 16,
     borderWidth: 1,
@@ -242,7 +242,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: COLORS.textGray,
     fontWeight: '600'
-
   },
   emptyText: {
     textAlign: 'center',
@@ -278,7 +277,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20
-
   },
   cancelText: {
     color: COLORS.textGray,
