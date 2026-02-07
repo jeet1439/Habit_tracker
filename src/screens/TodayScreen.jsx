@@ -49,8 +49,6 @@ export default function TodayScreen() {
 
   useEffect(() => {
     if (!userId) return;
-
-    // 1. Listen to Habits
     const habitUnsub = firestore()
       .collection('users').doc(userId).collection('habits')
       .orderBy('startTime', 'asc')
