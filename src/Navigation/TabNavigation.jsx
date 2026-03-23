@@ -7,7 +7,7 @@ import TodayScreen from '../screens/TodayScreen';
 import ScheduleScreen from '../screens/ScheduleScreen';
 import NotesScreen from '../screens/NotesScreen';
 import SettingsScreen from '../screens/SettingsScreen';
-
+import ProgressScreen from '../screens/ProgressScreen';
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigation() {
@@ -24,13 +24,14 @@ export default function TabNavigation() {
           else if (route.name === 'Schedule') iconName = focused ? 'stats-chart' : 'stats-chart-outline';
           else if (route.name === 'Notes') iconName = focused ? 'people' : 'people-outline';
           else if (route.name === 'Settings') iconName = focused ? 'settings' : 'settings-outline';
-
+          else if (route.name === 'Progress') iconName = focused ? 'bar-chart' : 'bar-chart-outline';
           return <Ionicons name={iconName} size={22} color={color} />;
         },
       })}
     >
       <Tab.Screen name="Today" component={TodayScreen} />
       <Tab.Screen name="Schedule" component={ScheduleScreen} />
+      <Tab.Screen name="Progress" component={ProgressScreen} />
       <Tab.Screen name="Notes" component={NotesScreen} />
       <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
