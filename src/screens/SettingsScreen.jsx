@@ -34,7 +34,7 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.bg} translucent={false} />
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.bg} translucent={false} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Profile Section */}
@@ -63,7 +63,7 @@ export default function SettingsScreen() {
           </View>
           <View style={styles.infoItem}>
             <Text style={styles.infoLabel}>Version</Text>
-            <Text style={styles.infoValue}>1.0.0</Text>
+            <Text style={styles.infoValue}>1.1.0</Text>
           </View>
         </View>
 
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   profileCard: {
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.surface,
     borderRadius: 16,
     padding: 24,
     alignItems: 'center',
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   infoItem: {
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.surface,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 10,

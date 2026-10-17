@@ -7,12 +7,12 @@ import firestore from '@react-native-firebase/firestore';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 const COLORS = {
-    bg: '#F8F9FE',
-    primary: '#5E60CE',
-    textDark: '#1E293B',
-    textGray: '#64748B',
+    bg: '#0B1020',
+    primary: '#8B8DFF',
+    textDark: '#F4F6FF',
+    textGray: '#A8B0C5',
     white: '#FFFFFF',
-    borderColor: '#E2E8F0',
+    borderColor: '#2A334B',
     googleRed: '#DB4437'
 };
 
@@ -79,8 +79,8 @@ export default function LoginScreen() {
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar
-                barStyle="dark-content"
-                backgroundColor="#F8F9FE"
+                barStyle="light-content"
+                backgroundColor="#0B1020"
                 translucent={false}
             />
             <View style={styles.content}>
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     },
     googleButton: {
         flexDirection: 'row',
-        backgroundColor: COLORS.white,
+        backgroundColor: '#161C2E',
         paddingVertical: 16,
         borderRadius: 30, // Rounded "Pill" style
         alignItems: 'center',

@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  Dimensions,
   StatusBar,
   ActivityIndicator,
 } from 'react-native';
@@ -13,23 +12,23 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Svg, { Circle } from 'react-native-svg';
 import { useHabits } from '../context/HabitContext';
 import HabitItem from '../components/HabitItem';
-import { COLORS, getWeekDates, getTodayStr } from '../utils/constants';
+import { COLORS, getWeekDates } from '../utils/constants';
 
 export default function TodayScreen() {
-  const { habits, dailyStatus, loading, getTodayStr: getToday, toggleHabitCompletion, getDailyStatusForDate } = useHabits();
+  const { habits, dailyStatus, dailyStatuses, loading, toggleHabitCompletion } = useHabits();
   const [weekData, setWeekData] = useState([]);
   const [streak, setStreak] = useState(0);
 
   // Calculate week progress and streak
   useEffect(() => {
-    const calculateProgress = async () => {
+    const calculateProgress = () => {
       const weekDates = getWeekDates();
       const progressData = [];
 
       for (const dateItem of weekDates) {
-        const status = dateItem.isToday 
-          ? dailyStatus 
-          : await getDailyStatusForDate(dateItem.dateStr);
+        const status = dateItem.isToday
+          ? dailyStatus
+          : dailyStatuses[dateItem.dateStr] || { completed: [] };
         
         const completedCount = status?.completed?.filter(id => 
           habits.some(h => h.id === id)
@@ -58,7 +57,7 @@ export default function TodayScreen() {
     };
 
     calculateProgress();
-  }, [habits, dailyStatus, getDailyStatusForDate]);
+  }, [habits, dailyStatus, dailyStatuses]);
 
   const todayCompleted = dailyStatus?.completed?.filter(id => 
     habits.some(h => h.id === id)
@@ -86,7 +85,7 @@ export default function TodayScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.bg} translucent={false} />
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.bg} translucent={false} />
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Header */}
@@ -131,7 +130,7 @@ export default function TodayScreen() {
             <CircularProgress total={totalCount} completed={completedCount} />
             <View style={styles.progressText}>
               <Text style={styles.progressTitle}>
-                {completedCount === totalCount ? '🎉 All Done!' : '💪 Keep Going!'}
+                {completedCount === totalCount ? 'All Done!' : 'Keep Going!'}
               </Text>
               <Text style={styles.progressDesc}>
                 {completedCount}/{totalCount} habits completed today
@@ -293,7 +292,7 @@ const styles = StyleSheet.create({
   },
   progressCard: {
     flexDirection: 'row',
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.surface,
     borderRadius: 16,
     padding: 20,
     alignItems: 'center',

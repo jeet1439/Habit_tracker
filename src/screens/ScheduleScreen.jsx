@@ -54,7 +54,7 @@ export default function ScheduleScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.bg} translucent={false} />
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.bg} translucent={false} />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Header */}

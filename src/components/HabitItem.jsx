@@ -33,24 +33,12 @@ const HabitItem = ({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isCompleted && styles.completedContainer]}>
       <TouchableOpacity
         style={styles.habitContent}
         onPress={() => onToggle && onToggle(habit.id)}
         activeOpacity={0.7}
       >
-        {/* Checkbox or Completion Status */}
-        <View
-          style={[
-            styles.checkbox,
-            isCompleted && { backgroundColor: COLORS.green500 },
-          ]}
-        >
-          {isCompleted && (
-            <Icon name="check" size={18} color={COLORS.white} />
-          )}
-        </View>
-
         {/* Habit Icon and Text */}
         <View style={styles.habitInfo}>
           <View
@@ -110,7 +98,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.surface,
     borderRadius: 12,
     marginVertical: 6,
     paddingVertical: 12,
@@ -121,20 +109,15 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 2,
   },
+  completedContainer: {
+    borderWidth: 1,
+    borderColor: COLORS.green700,
+  },
   habitContent: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: COLORS.borderColor,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
+    minHeight: 44,
   },
   habitInfo: {
     flex: 1,
@@ -142,9 +125,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
@@ -169,7 +152,7 @@ const styles = StyleSheet.create({
   actionButton: {
     width: 36,
     height: 36,
-    borderRadius: 8,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: 6,

@@ -1,29 +1,30 @@
 // Common colors used throughout the app
 export const COLORS = {
-  bg: '#F8F9FE',
-  primary: '#5E60CE',
-  primaryLight: '#E0E0FF',
+  bg: '#0B1020',
+  primary: '#8B8DFF',
+  primaryLight: '#25275A',
 
-  green100: '#DCFCE7',
-  green300: '#86EFAC',
-  green500: '#4ADE80',
-  green700: '#15803D',
-  green900: '#09662e',
+  green100: '#173B32',
+  green300: '#5EE6A8',
+  green500: '#36C982',
+  green700: '#197A50',
+  green900: '#0C4E35',
 
-  red100: '#FEE2E2',
-  red500: '#EF4444',
-  red600: '#DC2626',
+  red100: '#48232B',
+  red500: '#FF6675',
+  red600: '#D94A5A',
 
-  orange100: '#FFEDD5',
-  orange500: '#F97316',
+  orange100: '#4B301C',
+  orange500: '#FFAD5C',
 
-  blue500: '#3B82F6',
+  blue500: '#66A9FF',
 
-  textDark: '#1E293B',
-  textGray: '#64748B',
+  textDark: '#F4F6FF',
+  textGray: '#A8B0C5',
   white: '#FFFFFF',
-  borderColor: '#E2E8F0',
-  danger: '#e43c3c',
+  surface: '#161C2E',
+  borderColor: '#2A334B',
+  danger: '#FF6B78',
 };
 
 // Get icon name based on habit name
@@ -89,7 +90,7 @@ export const getWeekDates = () => {
   for (let i = 6; i >= 0; i--) {
     const date = new Date(today);
     date.setDate(today.getDate() - i);
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-');
     dates.push({
       dateStr,
       label: date.toLocaleDateString('en-US', { weekday: 'narrow' }),
@@ -104,7 +105,7 @@ export const getWeekDates = () => {
 // Get today's date string
 export const getTodayStr = () => {
   const today = new Date();
-  return today.toISOString().split('T')[0];
+  return [today.getFullYear(), String(today.getMonth() + 1).padStart(2, '0'), String(today.getDate()).padStart(2, '0')].join('-');
 };
 
 // Calculate streak from week data
